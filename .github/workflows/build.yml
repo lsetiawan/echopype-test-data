@@ -51,7 +51,7 @@ jobs:
         env:
             RCLONE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
       - name: Set test data dir
-        run: echo "TEST_DATA_FOLDER=TEST_DATA_FOLDER=${{ github.workspace }}/data" >> $GITHUB_ENV
+        run: echo "TEST_DATA_FOLDER=${{ github.workspace }}/data" >> $GITHUB_ENV
       - name: Clone test data
         run: |
             echo "Removing old test data"
@@ -69,7 +69,7 @@ jobs:
           README_FILE=$TEST_DATA_FOLDER/README.md
           # Print the readme file,
           # will eventually be the release notes?
-          echo $README_FILE
+          cat $README_FILE
           # Remove the readme afterwards
           rm $README_FILE
       - name: Zip all folders
@@ -80,7 +80,7 @@ jobs:
           import os
           import glob
 
-          test_data_folder = os.environ.get("TEST_DATA_FOLDER")
+          test_data_folder = Path(os.environ.get("TEST_DATA_FOLDER"))
           for d in test_data_folder.iterdir():
               # Folders only to zip
               if d.is_dir():
