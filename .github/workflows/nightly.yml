@@ -19,8 +19,10 @@ jobs:
         DATE_TAG="$( date -u '+%Y.%m.%d' )"
         VERSION_PREFIX="v"
         VERSION_PATTERN=$DATE_TAG
+        echo "Version: ${VERSION_PREFIX}${VERSION_PATTERN}"
         VERSION_PATCH=$(git tag --list "${VERSION_PREFIX}${VERSION_PATTERN}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
 
+        echo "Latest patch version: $VERSION_PATCH"
         if [ -z "$VERSION_PATCH" ]; then
             VERSION_PATCH=0
         else
