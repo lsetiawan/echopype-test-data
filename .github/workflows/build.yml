@@ -58,8 +58,7 @@ jobs:
                 echo "Removing old test data"
                 rm -rf $TEST_DATA_FOLDER
                 echo "Copying new test data from google drive"
-                # rclone copy gdrive: $TEST_DATA_FOLDER
-                echo $TEST_DATA_FOLDER
+                rclone copy gdrive: $TEST_DATA_FOLDER
                 echo "Done"
 
                 chmod -R ugoa+w $TEST_DATA_FOLDER
@@ -67,3 +66,5 @@ jobs:
             else
                 echo "${TEST_DATA_FOLDER} not found"
             fi
+        env:
+            RCLONE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
