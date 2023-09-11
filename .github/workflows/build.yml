@@ -6,7 +6,6 @@ env:
   RCLONE_CONFIG_GDRIVE_TYPE: drive
   TEMP_RCLONE_DIR: /opt/rclone_temp
   GDRIVE_ACCT_FILE: google-echopype.json
-  RCLONE_DRIVE_SERVICE_ACCOUNT_FILE: ${{github.env.TEMP_RCLONE_DIR}}/${{github.env.GDRIVE_ACCT_FILE}}
 
 jobs:
   build:
@@ -38,6 +37,9 @@ jobs:
                 echo "creating ${{env.TEMP_RCLONE_DIR}}"
                 mkdir ${{env.TEMP_RCLONE_DIR}}
             fi
+      - name: Setup service account file env
+        run: |
+            echo "export RCLONE_DRIVE_SERVICE_ACCOUNT_FILE=${{env.TEMP_RCLONE_DIR}}/${{env.GDRIVE_ACCT_FILE}}" >> $GITHUB_ENV
       - name: Get google json file
         run: |
-            echo ${{env.RCLONE_DRIVE_SERVICE_ACCOUNT_FILE}}
+            echo ${{github.env.RCLONE_DRIVE_SERVICE_ACCOUNT_FILE}}
