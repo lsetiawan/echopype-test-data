@@ -54,19 +54,14 @@ jobs:
         run: echo "TEST_DATA_FOLDER=TEST_DATA_FOLDER=${{ github.workspace }}/data" >> $GITHUB_ENV
       - name: Clone test data
         run: |
-            if [ -d $TEST_DATA_FOLDER ]
-            then
-                echo "Removing old test data"
-                rm -rf $TEST_DATA_FOLDER
-                echo "Copying new test data from google drive"
-                rclone copy gdrive: $TEST_DATA_FOLDER
-                echo "Done"
+            echo "Removing old test data"
+            rm -rf $TEST_DATA_FOLDER
+            echo "Copying new test data from google drive"
+            rclone copy gdrive: $TEST_DATA_FOLDER
+            echo "Done"
 
-                chmod -R ugoa+w $TEST_DATA_FOLDER
-                ls -lah $TEST_DATA_FOLDER
-            else
-                echo "${TEST_DATA_FOLDER} not found"
-            fi
+            chmod -R ugoa+w $TEST_DATA_FOLDER
+            ls -lah $TEST_DATA_FOLDER
         env:
             RCLONE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
       - name: Print README
