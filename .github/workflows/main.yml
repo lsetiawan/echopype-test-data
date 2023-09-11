@@ -1,4 +1,4 @@
-name: Build on Ubuntu
+name: Main
 on: push
 
 env:
@@ -7,8 +7,11 @@ env:
   TEMP_RCLONE_DIR: /opt/rclone_temp
   GDRIVE_ACCT_FILE: google-echopype.json
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
     defaults:
         run:
@@ -64,14 +67,6 @@ jobs:
             ls -lah $TEST_DATA_FOLDER
         env:
             RCLONE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
-      - name: Print README
-        run: |
-          README_FILE=$TEST_DATA_FOLDER/README.md
-          # Print the readme file,
-          # will eventually be the release notes?
-          cat $README_FILE
-          # Remove the readme afterwards
-          rm $README_FILE
       - name: Zip all folders
         shell: python
         run: |
@@ -89,3 +84,11 @@ jobs:
           print("Successfully zipped the following files:")
           for f in glob.glob(str((test_data_folder / '*.zip').absolute())):
               print(f)
+      - name: Publish Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: '${{github.env.TEST_DATA_FOLDER}}/*.zip'
+          body_path: '${{github.env.TEST_DATA_FOLDER}}/README.md'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
