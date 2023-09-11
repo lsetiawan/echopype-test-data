@@ -42,4 +42,11 @@ jobs:
             echo "RCLONE_DRIVE_SERVICE_ACCOUNT_FILE=${{env.TEMP_RCLONE_DIR}}/${{env.GDRIVE_ACCT_FILE}}" >> $GITHUB_ENV
       - name: Get google json file
         run: |
-            echo $RCLONE_DRIVE_SERVICE_ACCOUNT_FILE
+            echo $GDRIVE_JSON | jq . > $RCLONE_DRIVE_SERVICE_ACCOUNT_FILE
+        env:
+            GDRIVE_JSON: ${{ secrets.GOOGLE_SERVICE_JSON}}
+      - name: Check rclone listing
+        run: |
+            rclone ls gdrive:
+        env:
+            RCLONE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
