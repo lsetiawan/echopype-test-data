@@ -50,9 +50,10 @@ jobs:
             rclone ls gdrive:
         env:
             RCLONE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+      - name: Set test data dir
+        run: echo "TEST_DATA_FOLDER=TEST_DATA_FOLDER=${{ github.workspace }}/data" >> $GITHUB_ENV
       - name: Clone test data
         run: |
-            TEST_DATA_FOLDER=${{ github.workspace }}/data
             if [ -d $TEST_DATA_FOLDER ]
             then
                 echo "Removing old test data"
@@ -68,3 +69,28 @@ jobs:
             fi
         env:
             RCLONE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+      - name: Print README
+        run: |
+          README_FILE=$TEST_DATA_FOLDER/README.md
+          # Print the readme file,
+          # will eventually be the release notes?
+          echo $README_FILE
+          # Remove the readme afterwards
+          rm $README_FILE
+      - name: Zip all folders
+        shell: python
+        run: |
+          from pathlib import Path
+          import shutil
+          import os
+          import glob
+
+          test_data_folder = os.environ.get("TEST_DATA_FOLDER")
+          for d in test_data_folder.iterdir():
+              # Folders only to zip
+              if d.is_dir():
+                  shutil.make_archive(d, 'zip', d)
+          
+          print("Successfully zipped the following files:")
+          for f in glob.glob(str((test_data_folder / '*.zip').absolute())):
+              print(f)
