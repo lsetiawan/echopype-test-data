@@ -39,7 +39,7 @@ jobs:
             fi
       - name: Setup service account file env
         run: |
-            echo "export RCLONE_DRIVE_SERVICE_ACCOUNT_FILE=${{env.TEMP_RCLONE_DIR}}/${{env.GDRIVE_ACCT_FILE}}" >> $GITHUB_ENV
+            echo "RCLONE_DRIVE_SERVICE_ACCOUNT_FILE=${{env.TEMP_RCLONE_DIR}}/${{env.GDRIVE_ACCT_FILE}}" >> $GITHUB_ENV
       - name: Get google json file
         run: |
             echo $RCLONE_DRIVE_SERVICE_ACCOUNT_FILE
