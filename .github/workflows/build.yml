@@ -42,4 +42,4 @@ jobs:
             echo "export RCLONE_DRIVE_SERVICE_ACCOUNT_FILE=${{env.TEMP_RCLONE_DIR}}/${{env.GDRIVE_ACCT_FILE}}" >> $GITHUB_ENV
       - name: Get google json file
         run: |
-            echo ${{github.env.RCLONE_DRIVE_SERVICE_ACCOUNT_FILE}}
+            echo $RCLONE_DRIVE_SERVICE_ACCOUNT_FILE
