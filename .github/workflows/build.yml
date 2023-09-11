@@ -52,7 +52,7 @@ jobs:
             RCLONE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
       - name: Clone test data
         run: |
-            TEST_DATA_FOLDER=${{ github.workspace }}/test_data
+            TEST_DATA_FOLDER=${{ github.workspace }}/data
             if [ -d $TEST_DATA_FOLDER ]
             then
                 echo "Removing old test data"
