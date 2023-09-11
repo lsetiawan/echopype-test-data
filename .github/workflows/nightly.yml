@@ -23,24 +23,23 @@ jobs:
         VERSION_TAG="${VERSION_PREFIX}${DATE_TAG}"
         echo "Version: $VERSION_TAG"
         echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
-    - name: List tags
+    - name: Get latest tag
       run: |
-        git tag --list "$VERSION_TAG.*" --sort=-version:refname | head -n 1
-    # - name: Generate Git Tag
-    #   id: generate_tag
-    #   run: |
-    #     VERSION_PATCH=$(git tag --list "${VERSION_PREFIX}${VERSION_PATTERN}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
+        LATEST_TAG=$(git tag --list "$VERSION_TAG.*" --sort=-version:refname | head -n 1)
+        echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+    - name: Generate Git Tag
+      id: generate_tag
+      run: |
+        if [ -z "$LATEST_TAG" ]; then
+            VERSION_PATCH=0
+        else
+            VERSION_PATCH=$(echo $LATEST_TAG | grep -oE '[0-9]+$')
+            VERSION_PATCH=$((VERSION_PATCH + 1))
+        fi
 
-    #     echo "Latest patch version: $VERSION_PATCH"
-    #     if [ -z "$VERSION_PATCH" ]; then
-    #         VERSION_PATCH=0
-    #     else
-    #         VERSION_PATCH=$((VERSION_PATCH + 1))
-    #     fi
-
-    #     NEW_TAG="${VERSION_PREFIX}${VERSION_PATTERN}.${VERSION_PATCH}"
-    #     echo "Generated new tag: $NEW_TAG"
-    #     echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+        NEW_TAG="${VERSION_PREFIX}${VERSION_PATTERN}.${VERSION_PATCH}"
+        echo "Generated new tag: $NEW_TAG"
+        echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
     # - name: Push Git Tag
     #   run: |
     #     git config user.name "GitHub Actions"
