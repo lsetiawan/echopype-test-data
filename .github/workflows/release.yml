@@ -1,10 +1,9 @@
 name: Release
 on:
-  push:
-    # Sequence of patterns matched against refs/tags
-    tags:
-      - 'v2023.*.*'
-      - 'v2023.*.*.*' # for patch releases
+  schedule:
+    # Runs at 00:01 every day
+    - cron: '1 0 * * *'
+  workflow_dispatch:
 
 env:
   RCLONE_DRIVE_SCOPE: drive
@@ -16,7 +15,52 @@ permissions:
   contents: write
 
 jobs:
+  tag-data:
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      NEW_TAG: ${{ steps.generate_tag.outputs.NEW_TAG }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: '0'
+    - name: Setup tag pattern
+      run: |
+        DATE_TAG="$( date -u '+%Y.%m.%d' )"
+        VERSION_PREFIX="v"
+        VERSION_TAG="${VERSION_PREFIX}${DATE_TAG}"
+        echo "Version: $VERSION_TAG"
+        echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+    - name: Get latest tag
+      run: |
+        LATEST_TAG=$(git tag --list "$VERSION_TAG*" --sort=-version:refname | head -n 1)
+        echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+    - name: Generate Git Tag
+      id: generate_tag
+      run: |
+        if [ -z "$LATEST_TAG" ]; then
+            # No tag exists, so this is the first one
+            NEW_TAG="${VERSION_TAG}"
+        else
+            # Look to see if there is a patch tag
+            PATCH_TAG=$(git tag --list "$VERSION_TAG.*" --sort=-version:refname | head -n 1)
+            if [ -z "$PATCH_TAG" ]; then
+                # No patch tag exists, so this is the first patch tag
+                VERSION_PATCH=1
+            else
+                # Get the patch number from the latest patch tag
+                VERSION_PATCH=$(echo $PATCH_TAG | grep -oE '[0-9]+$')
+                # Increment the patch number
+                VERSION_PATCH=$((VERSION_PATCH + 1))
+            fi
+            NEW_TAG="${VERSION_TAG}.${VERSION_PATCH}"
+        fi
+        
+        echo "Generated new tag: $NEW_TAG"
+        echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
   build-and-release:
+    needs: tag-data
     runs-on: ubuntu-latest
     defaults:
         run:
@@ -91,9 +135,10 @@ jobs:
               print(f)
       - name: Publish Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
+          tag_name: ${{ env.NEW_TAG }}
           files: ${{ env.TEST_DATA_FOLDER }}/*.zip
           body_path: ${{ env.TEST_DATA_FOLDER }}/README.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{needs.tag-data.outputs.NEW_TAG}}
